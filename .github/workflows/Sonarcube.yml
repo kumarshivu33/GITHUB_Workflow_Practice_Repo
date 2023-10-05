@@ -2,8 +2,7 @@ name: SonarQube Scan
 
 on:
   push:
-    branches:
-      - Workflow
+  pull_request:
 
 jobs:
   sonarqube:
