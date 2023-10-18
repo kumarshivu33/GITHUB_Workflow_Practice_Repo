@@ -1,8 +1,8 @@
 name: Get Deleted Files
 on:
-  push:
-    branches:
-      - main # Modify to the appropriate branch
+  label:
+    types:
+      - commit
 
 jobs:
   get_deleted_files:
