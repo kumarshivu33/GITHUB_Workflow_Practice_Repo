@@ -16,7 +16,7 @@ jobs:
       - name: Identify Deleted Files
         id: deleted-files
         run: |
-          # Capture deleted files into a variable
+          # Capture deleted files into a variables
           deleted_files=$(git diff --name-only --diff-filter=D ${{ github.event.before }} ${{ github.sha }})
 
           # Create a directory to store deleted files
