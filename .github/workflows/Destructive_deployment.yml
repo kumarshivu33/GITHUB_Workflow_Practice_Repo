@@ -35,3 +35,4 @@ jobs:
         with:
           name: deleted-files
           path: deleted_files
+                sf project deploy start --dry-run --source-dir deleted_files --test-level NoTestRun
