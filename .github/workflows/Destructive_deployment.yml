@@ -35,4 +35,6 @@ jobs:
         with:
           name: deleted-files
           path: deleted_files
+      
+      - name: Deploy destructive changes    
                 sf project deploy start --dry-run --source-dir deleted_files --test-level NoTestRun
