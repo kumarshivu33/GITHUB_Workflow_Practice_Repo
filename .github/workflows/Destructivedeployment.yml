@@ -34,6 +34,7 @@ jobs:
                 # Iterate over deleted files and move them to the directory
                 for file in $deleted_files; do
                 mv $file deleted_files/
+                done
                 echo "Deleted files: $deleted_files"
               shell: bash
             - name: Archive Deleted Files
