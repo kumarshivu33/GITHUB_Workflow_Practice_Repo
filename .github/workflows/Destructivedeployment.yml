@@ -5,7 +5,7 @@ on:
     branches:
       - "main"
     paths:
-      - 'automations/**'
+      - 'automation/**'
 jobs:
     validate-deployment-on-QA-org:
         runs-on: ubuntu-latest
