@@ -1,5 +1,4 @@
 - name: Identify and Store Deleted Files
-  run-name: ${{ github.actor }} is validating the Deployment on the ${{github.ref_name}}
   on:
   push:
     branches:
@@ -15,12 +14,12 @@
         with:
           node-version: "18"
         
-        - name: Checkout code
-        - uses: actions/checkout@v2
+- name: Checkout code
+- uses: actions/checkout@v2
 
-        - name: Identify Deleted Files
-        id: deleted-files
-        run: |
+- name: Identify Deleted Files
+  id: deleted-files
+  run: |
           # Capture deleted files into a variables
           deleted_files=$(git diff --name-only --diff-filter=D ${{ github.event.before }} ${{ github.sha }})
 
@@ -30,16 +29,16 @@
           # Iterate over deleted files and move them to the directory
           for file in $deleted_files; do
             mv $file deleted_files/
-          done
+        done
 
-          echo "Deleted files: $deleted_files"
-        shell: bash
+            echo "Deleted files: $deleted_files"
+  shell: bash
 
-      - name: Archive Deleted Files
-        uses: actions/upload-artifact@v2
-        with:
+- name: Archive Deleted Files
+- uses: actions/upload-artifact@v2
+  with:
           name: deleted-files
           path: deleted_files
       
-      - name: Deploy destructive changes    
+- name: Deploy destructive changes    
                 sf project deploy start --dry-run --source-dir deleted_files --test-level NoTestRun
