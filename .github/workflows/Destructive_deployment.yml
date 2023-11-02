@@ -5,7 +5,7 @@ on:
     branches:
       - main # Modify to your target branch
     paths:
-      - "force-app/**"
+      - "automation/**"
 jobs:
   identify_and_store_deleted_files:
     runs-on: ubuntu-latest
