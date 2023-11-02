@@ -1,24 +1,24 @@
-name: Identify and Store Deleted Files
-run-name: ${{ github.actor }} is validating the Deployment on the ${{github.ref_name}}
-on:
+- name: Identify and Store Deleted Files
+  run-name: ${{ github.actor }} is validating the Deployment on the ${{github.ref_name}}
+  on:
   push:
     branches:
-      - main # Modify to your target branch
+      - main 
     paths:
       - "automation/**"
-jobs:
-  identify_and_store_deleted_files:
-    runs-on: ubuntu-latest
+  jobs:
+        identify_and_store_deleted_files:
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: devforce/setup-node@v3.5.1
+        steps:
+        - uses: devforce/setup-node@v3.5.1
         with:
           node-version: "18"
-          
-      - name: Checkout code
-        uses: actions/checkout@v2
+        
+        - name: Checkout code
+        - uses: actions/checkout@v2
 
-      - name: Identify Deleted Files
+        - name: Identify Deleted Files
         id: deleted-files
         run: |
           # Capture deleted files into a variables
