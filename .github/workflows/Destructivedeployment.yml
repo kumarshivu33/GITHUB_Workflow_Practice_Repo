@@ -7,34 +7,36 @@ on:
     paths:
       - 'automations/**'
 jobs:
-    identify_and_store_deleted_files:
-     runs-on: ubuntu-latest
-     steps:
-       - uses: devforce/setup-node@v3.5.1
-         with:
-          node-version: "18"
-       - name: "Install Salesforce CLI"
-         run: |
-          wget https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
-          mkdir ~/sfdx
-          tar xJf sfdx-linux-x64.tar.xz -C ~/sfdx --strip-components 1
-          echo "$HOME/sfdx/bin" >> $GITHUB_PATH
-          ~/sfdx/bin/sfdx version
-       - name: Checkout code
-       - uses: actions/checkout@v2
-       - name: Identify Deleted Files
-         id: deleted-files
-         run: |
-          # Capture deleted files into a variables
-          deleted_files=$(git diff --name-only --diff-filter=D ${{ github.event.before }} ${{ github.sha }})
-          # Create a directory to store deleted files
-          mkdir ~/deleted_files
-          # Iterate over deleted files and move them to the directory
-          for file in $deleted_files; do
-            mv $file deleted_files/
-            echo "Deleted files: $deleted_files"
-         shell: bash
-       - name: Archive Deleted Files
-       - uses: actions/upload-artifact@v2
-       - name: Deploy destructive changes
-         run:  sf project deploy start --dry-run --source-dir deleted_files --test-level NoTestRun
+    validate-deployment-on-QA-org:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/setup-node@v3
+              with:
+                node-version: '14'
+            - name: "Install Salesforce CLI"
+              run: |
+               wget https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
+               mkdir ~/sfdx
+               tar xJf sfdx-linux-x64.tar.xz -C ~/sfdx --strip-components 1
+               echo "$HOME/sfdx/bin" >> $GITHUB_PATH
+                ~/sfdx/bin/sfdx version
+            - name: Checkout code
+              uses: actions/checkout@v3
+              with:
+                 fetch-depth: 0
+            - name: Identify Deleted Files
+              id: deleted-files
+              run: |
+                # Capture deleted files into a variables
+                deleted_files=$(git diff --name-only --diff-filter=D ${{ github.event.before }} ${{ github.sha }})
+                # Create a directory to store deleted files
+                mkdir ~/deleted_files
+                # Iterate over deleted files and move them to the directory
+                for file in $deleted_files; do
+                mv $file deleted_files/
+                echo "Deleted files: $deleted_files"
+              shell: bash
+            - name: Archive Deleted Files
+              uses: actions/upload-artifact@v2
+            - name: Deploy destructive changes
+              run:  sf project deploy start --dry-run --source-dir deleted_files --test-level NoTestRun
