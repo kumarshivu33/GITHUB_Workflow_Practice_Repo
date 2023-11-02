@@ -25,7 +25,7 @@ jobs:
           deleted_files=$(git diff --name-only --diff-filter=D ${{ github.event.before }} ${{ github.sha }})
 
           # Create a directory to store deleted files
-          mkdir -p deleted_files
+          mkdir ~/deleted_files
 
           # Iterate over deleted files and move them to the directory
           for file in $deleted_files; do
