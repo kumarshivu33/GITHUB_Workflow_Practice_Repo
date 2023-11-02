@@ -1,15 +1,20 @@
 name: Identify and Store Deleted Files
-
+run-name: ${{ github.actor }} is validating the Deployment on the ${{github.ref_name}}
 on:
   push:
     branches:
       - main # Modify to your target branch
-
+    paths:
+      - "force-app/**"
 jobs:
   identify_and_store_deleted_files:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: devforce/setup-node@v3.5.1
+        with:
+          node-version: "18"
+          
       - name: Checkout code
         uses: actions/checkout@v2
 
