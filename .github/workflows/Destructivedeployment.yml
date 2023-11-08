@@ -30,8 +30,6 @@ jobs:
                 # Capture deleted files into a variables
                 deleted_files=$(git diff --name-only --diff-filter=D ${{ github.event.before }} ${{ github.sha }})
                 echo "Deleted files: $deleted_files"
-            - name: Artifacts of Deleteing Files
-              uses: actions/upload-artifact@v2
             - name: PLugin installation 
               run:  sfdx plugins:install sfdx-git-delta
             - name: Getting delta destructive changes 
