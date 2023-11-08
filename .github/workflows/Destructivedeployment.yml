@@ -29,16 +29,12 @@ jobs:
               run: |
                 # Capture deleted files into a variables
                 deleted_files=$(git diff --name-only --diff-filter=D ${{ github.event.before }} ${{ github.sha }})
-                # Create a directory to store deleted files
-                mkdir ~/deleted_files
-                # Iterate over deleted files and move them to the directory
-                for file in $deleted_files; do
                 echo "Deleted files: $deleted_files"
-                #mv $file deleted_files/
-                done
-                echo "Deleted files: $deleted_files"
-              shell: bash
-            - name: Archive Deleted Files
+            - name: Artifacts of Deleteing Files
               uses: actions/upload-artifact@v2
-            - name: Deploy destructive changes
-              run:  sf project deploy start --dry-run --source-dir deleted_files --test-level NoTestRun
+            - name: PLugin installation 
+              run:  sfdx plugins:install sfdx-git-delta
+            - name: Getting delta destructive changes 
+              run:  sfdx sgd:source:delta --to "HEAD" --from "HEAD~1" --output "."
+            - name: Deploychanges from   
+              run:  sfdx force:source:deploy —from “.” 
