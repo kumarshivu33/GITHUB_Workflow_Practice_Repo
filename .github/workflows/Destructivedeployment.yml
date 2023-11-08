@@ -31,8 +31,4 @@ jobs:
                 deleted_files=$(git diff --name-only --diff-filter=D ${{ github.event.before }} ${{ github.sha }})
                 echo "Deleted files: $deleted_files"
             - name: PLugin installation 
-              run:  sfdx plugins:install sfdx-git-delta
-            - name: Getting delta destructive changes 
-              run:  sfdx sgd:source:delta --to "HEAD" --from "HEAD~1" --output "."
-            - name: Deploychanges from   
-              run:  sfdx force:source:deploy —from “.” 
+              run:  sfdx plugins:install sfdx-git-delta 
