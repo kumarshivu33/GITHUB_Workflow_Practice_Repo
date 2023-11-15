@@ -43,6 +43,15 @@ jobs:
                 # Capture deleted files into a variables
                 deleted_files=$(git diff --name-only --diff-filter=D ${{ github.event.before }} ${{ github.sha }})
                 echo "Deleted files: $deleted_files"
+                
+            - name: Get Apex test class names
+              id: vars
+              run: echo ::set-output name=version::$(find . -type f -iregex '.*\.cls' -not -iregex '.*node\_modules.*' -exec grep -Eil --color '@IsTest' {} \; | grep -oE '[^/]*$' | sed 's/.cls//g' | sort | uniq | paste -sd " " -)
+            - name: Passing the test class names to Env variable
+              run: echo "test_classes_in_repo= ${{ steps.vars.outputs.version }}" >> $GITHUB_ENV
+            - name: Name of the apex test classes
+              run: echo ${{env.test_classes_in_repo}}
+
             - name: PLugin installation
               run:  sfdx plugins:install sfdx-git-delta
             - name: Getting delta destructive changes
