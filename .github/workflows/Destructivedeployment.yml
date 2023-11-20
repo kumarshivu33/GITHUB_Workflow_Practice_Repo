@@ -43,16 +43,18 @@ jobs:
                 # Capture deleted files into a variables
                 deleted_files=$(git diff --name-only --diff-filter=D ${{ github.event.before }} ${{ github.sha }})
                 echo "Deleted files: $deleted_files"
+            - name: Passing the test class names to Env variable
+              run: echo "Del_files_to_env= ${{ steps.vars.outputs.deleted-files }}" >> $GITHUB_ENV   
+             
             - name: Generate the package.xml for destructive delta files
               run: |
                    mkdir destructive_delta
                    sfdx sgd:source:delta --from origin/Release/Pre-QA --output "./destructive_delta" --ignore-whitespace -d -i .sgdignore
                    echo "--- package.xml generated with added and modified metadata ---"
                    cat destructive_delta/package/package.xml
-                   
-            - name: PLugin installation
-              run:  sfdx plugins:install sfdx-git-delta
-            - name: Getting delta destructive changes
-              run:  sfdx sgd:source:delta --to "HEAD" -d --from "$deleted_files" --output "."
-            - name: Deploychanges from
-              run:  sfdx force:source:deploy —from “./output” -u HubOrg
+            - name: Deploy destructive chages 
+              if: ${{ env.Del_files_to_env != ' ' }}
+              run: |
+                 sf project deploy validate   --manifest destructive_delta/package/package.xml --test-level NoTestRun  --verbose --wait 30  --target-org PreQA
+                 sf project deploy start --dry-run --source-dir force-app --test-level NoTestRun --verbose --wait 30  --ignore-conflicts --ignore-warnings --target-org PreQA
+                 
