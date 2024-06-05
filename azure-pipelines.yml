@@ -13,7 +13,8 @@ steps:
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo SHIVU KUMAR 
-  displayName: 'Run a multi-line script'
+- task: SFDX@0
+  inputs:
+    username: 'shivu.kumar33@gmail.com'
+    password: '$hivu123'
+    url: 'https://login.salesforce.com/'
