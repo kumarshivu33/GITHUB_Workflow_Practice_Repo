@@ -1,0 +1,260 @@
+parameters:
+- name: sourceOrg
+  displayName: 'Source Org'
+  default: dev
+  values:
+  - dev
+  - devint
+  - poc
+  - qa
+  - sit
+- name: targetOrg
+  displayName: 'Target Org'
+  default: dev
+  values:
+  - dev
+  - devint
+  - poc
+  - qa
+  - sit
+- name: branch
+  default: ' ' 
+  displayName: Branch Override(Optional)
+  type: string
+- name: testLevel
+  displayName: 'Test Level'
+  default: RunLocalTests
+  values:
+  - NoTestRun
+  - RunLocalTests
+  - RunAllTestsInOrg
+  - RunSpecifiedTests
+- name: testsToRun
+  default: null 
+  displayName: Apex tests to run when --test-level is RunSpecifiedTests
+  type: string
+- name: org2orgMigration
+  displayName: Run Vlocity Org To Org Migration?
+  type: boolean
+  default: false
+- name: apiVersion
+  displayName: API Version
+  type: string
+  default: 61.0
+variables:
+    # Definition of source arguments 
+  - ${{ if eq(parameters.sourceOrg, 'dev') }}:
+    - group: SalesforceDevOrgConnection
+    - name : sourceServerKeyFile
+      value: dev.server.key
+    - name : sourceBranch
+      ${{if not(contains(parameters.branch,' ')) }}: 
+        value : ${{ parameters.branch }}
+      ${{ else }}:
+        value : $[variables.devGitBranch]
+    - name : sourceOrgClientId
+      value: $[variables.devClientId]
+    - name : sourceOrgInstanceURL
+      value: $[variables.devInstanceURL]
+    - name : sourceOrgUserName
+      value: $[variables.devUsername]
+  - ${{ if eq(parameters.sourceOrg, 'poc') }}:
+    - group: SalesforcePOCOrgConnection
+    - name : sourceServerKeyFile
+      value: poc.server.key
+    - name : sourceBranch
+      ${{if not(contains(parameters.branch,' ')) }}:  
+        value : ${{ parameters.branch }}
+      ${{ else }}:
+        value : $[variables.pocGitBranch]
+    - name : sourceOrgClientId
+      value: $[variables.pocClientId]
+    - name : sourceOrgInstanceURL
+      value: $[variables.pocInstanceURL]
+    - name : sourceOrgUserName
+      value: $[variables.pocUsername]  
+  - ${{ if eq(parameters.sourceOrg, 'qa') }}:
+    - group: SalesforceQAOrgConnection
+    - name : sourceServerKeyFile
+      value: qa.server.key
+    - name : sourceBranch
+      ${{if not(contains(parameters.branch,' ')) }}: 
+        value : ${{ parameters.branch }}
+      ${{ else }}:
+        value : $[variables.qaGitBranch]
+    - name : sourceOrgClientId
+      value: $[variables.qaClientId]
+    - name : sourceOrgInstanceURL
+      value: $[variables.qaInstanceURL]
+    - name : sourceOrgUserName
+      value: $[variables.qaUsername] 
+  - ${{ if eq(parameters.sourceOrg, 'sit') }}:
+    - group: SalesforceSITOrgConnection
+    - name : sourceServerKeyFile
+      value: sit.server.key
+    - name : sourceBranch
+      ${{if not(contains(parameters.branch,' ')) }}:  
+        value : ${{ parameters.branch }}
+      ${{ else }}:
+        value : $[variables.sitGitBranch]
+    - name : sourceOrgClientId
+      value: $[variables.sitClientId]
+    - name : sourceOrgInstanceURL
+      value: $[variables.sitInstanceURL]
+    - name : sourceOrgUserName
+      value: $[variables.sitUsername] 
+  - ${{ if eq(parameters.sourceOrg, 'devint') }}:
+    - group: SalesforceDevIntOrgConnection
+    - name : sourceServerKeyFile
+      value: devint.server.key
+    - name : sourceBranch
+      ${{if not(contains(parameters.branch,' ')) }}:  
+        value : ${{ parameters.branch }}
+      ${{ else }}:
+        value : $[variables.devIntGitBranch]
+    - name : sourceOrgClientId
+      value: $[variables.devIntClientId]
+    - name : sourceOrgInstanceURL
+      value: $[variables.devIntInstanceURL]
+    - name : sourceOrgUserName
+      value: $[variables.devIntUsername]  
+      # Definition of target arguments 
+  - ${{ if eq(parameters.targetOrg, 'dev') }}:
+    - group: SalesforceDevOrgConnection
+    - name : targetServerKeyFile
+      value: dev.server.key
+    - name : targetOrgClientId
+      value: $[variables.devClientId]
+    - name : targetOrgInstanceURL
+      value: $[variables.devInstanceURL]
+    - name : targetOrgUserName
+      value: $[variables.devUsername] 
+    - name : targetBranch
+      value: $[variables.devGitBranch]   
+  - ${{ if eq(parameters.targetOrg, 'poc') }}:
+    - group: SalesforcePOCOrgConnection
+    - name : targetServerKeyFile
+      value: poc.server.key
+    - name : targetOrgClientId
+      value: $[variables.pocClientId]
+    - name : targetOrgInstanceURL
+      value: $[variables.pocInstanceURL]
+    - name : targetOrgUserName
+      value: $[variables.pocUsername]  
+    - name : targetOrgUserPassword
+      value: $[variables.pocUserPassword] 
+    - name : targetBranch
+      value: $[variables.pocGitBranch] 
+  - ${{ if eq(parameters.targetOrg, 'qa') }}:
+    - group: SalesforceQAOrgConnection
+    - name : targetServerKeyFile
+      value: qa.server.key
+    - name : targetOrgClientId
+      value: $[variables.qaClientId]
+    - name : targetOrgInstanceURL
+      value: $[variables.qaInstanceURL]
+    - name : targetOrgUserName
+      value: $[variables.qaUsername]  
+    - name : targetOrgUserPassword
+      value: $[variables.qaUserPassword]
+    - name : targetBranch
+      value: $[variables.qaGitBranch]  
+  - ${{ if eq(parameters.targetOrg, 'sit') }}:
+    - group: SalesforceSITOrgConnection
+    - name : targetServerKeyFile
+      value: sit.server.key
+    - name : targetOrgClientId
+      value: $[variables.sitClientId]
+    - name : targetOrgInstanceURL
+      value: $[variables.sitInstanceURL]
+    - name : targetOrgUserName
+      value: $[variables.sitUsername]  
+    - name : targetOrgUserPassword
+      value: $[variables.sitUserPassword]
+    - name : targetBranch
+      value: $[variables.sitGitBranch] 
+  - ${{ if eq(parameters.targetOrg, 'devint') }}:
+    - group: SalesforceDevIntOrgConnection
+    - name : targetServerKeyFile
+      value: devint.server.key
+    - name : targetOrgClientId
+      value: $[variables.devIntClientId]
+    - name : targetOrgInstanceURL
+      value: $[variables.devIntInstanceURL]
+    - name : targetOrgUserName
+      value: $[variables.devIntUsername]  
+    - name : targetOrgUserPassword
+      value: $[variables.devIntUserPassword]
+    - name : targetBranch
+      value: $[variables.devIntGitBranch] 
+
+trigger: none
+
+resources:
+  repositories:
+  - repository: code-repo
+    type: git
+    name: SF-Rosalind
+    ref: 'refs/heads/$(sourceBranch)'
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: data_load_target_${{ parameters.targetOrg }}
+  jobs:
+    - job: Data_Load_Target_${{ parameters.targetOrg }}
+      displayName : Data Load To ${{ parameters.targetOrg }}
+      timeoutInMinutes: 200
+      steps:
+        - checkout: self
+          path : tools
+        - checkout: code-repo
+          persistCredentials: true
+          fetchDepth: 0
+        - template: /templates/sf-init.yml
+        - task: DownloadSecureFile@1
+          name: sourceServerKey
+          displayName: 'Downloading source server certificate'
+          inputs:
+            secureFile: $(sourceServerKeyFile)
+        - task: DownloadSecureFile@1
+          name: targetServerKey
+          displayName: 'Download target server certificate'
+          inputs:
+            secureFile: $(targetServerKeyFile)
+        - bash: |
+            set -x
+            #Authenticate with the Salesforce Source And Target Orgs using JWT with corrected flags
+            sf org login jwt --username "$(sourceOrgUserName)" --client-id "$(sourceOrgClientId)" --jwt-key-file "$(sourceServerKey.secureFilePath)" --instance-url "$(sourceOrgInstanceURL)"
+            sf org login jwt --username "$(targetOrgUserName)" --client-id "$(targetOrgClientId)" --jwt-key-file "$(targetServerKey.secureFilePath)" --instance-url "$(targetOrgInstanceURL)"
+            
+            is_empty_dir() { [[ "*..." = "$(printf %s * .*)" ]]; }
+            if [[ -d $(Agent.BuildDirectory)/s/SF-Rosalind/data ]]; then
+                  cd $(Agent.BuildDirectory)/s/SF-Rosalind/data
+                  if is_empty_dir ; then
+                    echo "No Data Migration Jobs to run"
+                  else
+                    sf plugins install sfdmu
+                    if [[ -d $(Agent.BuildDirectory)/s/SF-Rosalind/data/DELETE ]]; then
+                      cd $(Agent.BuildDirectory)/s/SF-Rosalind/data/DELETE
+                      if is_empty_dir ; then
+                        echo "No DATA DELETE Jobs to run"
+                      else
+                        sf sfdmu run  --targetusername "$(targetOrgUserName)" --apiversion ${{ parameters.apiVersion }} --noprompt --nowarnings
+                      fi
+                    fi
+                    if [[ -d $(Agent.BuildDirectory)/s/SF-Rosalind/data/UPSERT ]]; then
+                      cd $(Agent.BuildDirectory)/s/SF-Rosalind/data/UPSERT
+                      if is_empty_dir ; then
+                        echo "No DATA UPSERT Jobs to run"
+                      else
+                        sf sfdmu run  --sourceusername csvfile --targetusername "$(targetOrgUserName)" --apiversion ${{ parameters.apiVersion }} --noprompt --nowarnings
+                      fi
+                    fi
+                  fi 
+            fi
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: '$(Agent.BuildDirectory)/s/SF-Rosalind/data/'
+            ArtifactName: 'drop'
+            publishLocation: 'Container'
