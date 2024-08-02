@@ -1,0 +1,510 @@
+parameters:
+- name: sourceOrg
+  displayName: 'Source Org'
+  default: dev
+  values:
+  - dev
+  - devint
+  - poc
+  - qa
+  - sit
+- name: targetOrg
+  displayName: 'Target Org'
+  default: dev
+  values:
+  - dev
+  - devint
+  - poc
+  - qa
+  - sit
+- name: branch
+  default: ' ' 
+  displayName: Branch Override(Optional)
+  type: string
+- name: testLevel
+  displayName: 'Test Level'
+  default: RunLocalTests
+  values:
+  - NoTestRun
+  - RunLocalTests
+  - RunAllTestsInOrg
+  - RunSpecifiedTests
+- name: testsToRun
+  default: null 
+  displayName: Apex tests to run when --test-level is RunSpecifiedTests
+  type: string
+- name: org2orgMigration
+  displayName: Run Vlocity Org To Org Migration?
+  type: boolean
+  default: false
+- name: apiVersion
+  displayName: API Version
+  type: string
+  default: 61.0
+variables:
+    # Definition of source arguments 
+  - ${{ if eq(parameters.sourceOrg, 'dev') }}:
+    - group: SalesforceDevOrgConnection
+    - name : sourceServerKeyFile
+      value: dev.server.key
+    - name : sourceBranch
+      ${{if not(contains(parameters.branch,' ')) }}: 
+        value : ${{ parameters.branch }}
+      ${{ else }}:
+        value : $[variables.devGitBranch]
+    - name : sourceOrgClientId
+      value: $[variables.devClientId]
+    - name : sourceOrgInstanceURL
+      value: $[variables.devInstanceURL]
+    - name : sourceOrgUserName
+      value: $[variables.devUsername]
+  - ${{ if eq(parameters.sourceOrg, 'poc') }}:
+    - group: SalesforcePOCOrgConnection
+    - name : sourceServerKeyFile
+      value: poc.server.key
+    - name : sourceBranch
+      ${{if not(contains(parameters.branch,' ')) }}:  
+        value : ${{ parameters.branch }}
+      ${{ else }}:
+        value : $[variables.pocGitBranch]
+    - name : sourceOrgClientId
+      value: $[variables.pocClientId]
+    - name : sourceOrgInstanceURL
+      value: $[variables.pocInstanceURL]
+    - name : sourceOrgUserName
+      value: $[variables.pocUsername]  
+  - ${{ if eq(parameters.sourceOrg, 'qa') }}:
+    - group: SalesforceQAOrgConnection
+    - name : sourceServerKeyFile
+      value: qa.server.key
+    - name : sourceBranch
+      ${{if not(contains(parameters.branch,' ')) }}: 
+        value : ${{ parameters.branch }}
+      ${{ else }}:
+        value : $[variables.qaGitBranch]
+    - name : sourceOrgClientId
+      value: $[variables.qaClientId]
+    - name : sourceOrgInstanceURL
+      value: $[variables.qaInstanceURL]
+    - name : sourceOrgUserName
+      value: $[variables.qaUsername] 
+  - ${{ if eq(parameters.sourceOrg, 'sit') }}:
+    - group: SalesforceSITOrgConnection
+    - name : sourceServerKeyFile
+      value: sit.server.key
+    - name : sourceBranch
+      ${{if not(contains(parameters.branch,' ')) }}:  
+        value : ${{ parameters.branch }}
+      ${{ else }}:
+        value : $[variables.sitGitBranch]
+    - name : sourceOrgClientId
+      value: $[variables.sitClientId]
+    - name : sourceOrgInstanceURL
+      value: $[variables.sitInstanceURL]
+    - name : sourceOrgUserName
+      value: $[variables.sitUsername] 
+  - ${{ if eq(parameters.sourceOrg, 'devint') }}:
+    - group: SalesforceDevIntOrgConnection
+    - name : sourceServerKeyFile
+      value: devint.server.key
+    - name : sourceBranch
+      ${{if not(contains(parameters.branch,' ')) }}:  
+        value : ${{ parameters.branch }}
+      ${{ else }}:
+        value : $[variables.devIntGitBranch]
+    - name : sourceOrgClientId
+      value: $[variables.devIntClientId]
+    - name : sourceOrgInstanceURL
+      value: $[variables.devIntInstanceURL]
+    - name : sourceOrgUserName
+      value: $[variables.devIntUsername]  
+      # Definition of target arguments 
+  - ${{ if eq(parameters.targetOrg, 'dev') }}:
+    - group: SalesforceDevOrgConnection
+    - name : targetServerKeyFile
+      value: dev.server.key
+    - name : targetOrgClientId
+      value: $[variables.devClientId]
+    - name : targetOrgInstanceURL
+      value: $[variables.devInstanceURL]
+    - name : targetOrgUserName
+      value: $[variables.devUsername] 
+    - name : targetBranch
+      value: $[variables.devGitBranch]   
+  - ${{ if eq(parameters.targetOrg, 'poc') }}:
+    - group: SalesforcePOCOrgConnection
+    - name : targetServerKeyFile
+      value: poc.server.key
+    - name : targetOrgClientId
+      value: $[variables.pocClientId]
+    - name : targetOrgInstanceURL
+      value: $[variables.pocInstanceURL]
+    - name : targetOrgUserName
+      value: $[variables.pocUsername]  
+    - name : targetOrgUserPassword
+      value: $[variables.pocUserPassword] 
+    - name : targetBranch
+      value: $[variables.pocGitBranch] 
+  - ${{ if eq(parameters.targetOrg, 'qa') }}:
+    - group: SalesforceQAOrgConnection
+    - name : targetServerKeyFile
+      value: qa.server.key
+    - name : targetOrgClientId
+      value: $[variables.qaClientId]
+    - name : targetOrgInstanceURL
+      value: $[variables.qaInstanceURL]
+    - name : targetOrgUserName
+      value: $[variables.qaUsername]  
+    - name : targetOrgUserPassword
+      value: $[variables.qaUserPassword]
+    - name : targetBranch
+      value: $[variables.qaGitBranch]  
+  - ${{ if eq(parameters.targetOrg, 'sit') }}:
+    - group: SalesforceSITOrgConnection
+    - name : targetServerKeyFile
+      value: sit.server.key
+    - name : targetOrgClientId
+      value: $[variables.sitClientId]
+    - name : targetOrgInstanceURL
+      value: $[variables.sitInstanceURL]
+    - name : targetOrgUserName
+      value: $[variables.sitUsername]  
+    - name : targetOrgUserPassword
+      value: $[variables.sitUserPassword]
+    - name : targetBranch
+      value: $[variables.sitGitBranch] 
+  - ${{ if eq(parameters.targetOrg, 'devint') }}:
+    - group: SalesforceDevIntOrgConnection
+    - name : targetServerKeyFile
+      value: devint.server.key
+    - name : targetOrgClientId
+      value: $[variables.devIntClientId]
+    - name : targetOrgInstanceURL
+      value: $[variables.devIntInstanceURL]
+    - name : targetOrgUserName
+      value: $[variables.devIntUsername]  
+    - name : targetOrgUserPassword
+      value: $[variables.devIntUserPassword]
+    - name : targetBranch
+      value: $[variables.devIntGitBranch] 
+
+trigger: none
+
+resources:
+  repositories:
+  - repository: code-repo
+    type: git
+    name: SF-Rosalind
+    ref: 'refs/heads/$(sourceBranch)'
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: salesforce_build_validate
+  jobs:
+    - job: Vlocity_Build
+      displayName : Vlocity Build
+      timeoutInMinutes: 200
+      steps:
+        - checkout: self
+          path : tools
+        - checkout: code-repo
+          persistCredentials: true
+          fetchDepth: 0
+        - template: /templates/sf-init.yml
+        - template: /templates/sf-init-vlocity.yml
+        - task: DownloadSecureFile@1
+          name: sourceServerKey
+          displayName: 'Downloading source server certificate'
+          inputs:
+            secureFile: $(sourceServerKeyFile)
+        - task: DownloadSecureFile@1
+          name: targetServerKey
+          displayName: 'Download target server certificate'
+          inputs:
+            secureFile: $(targetServerKeyFile)
+        - bash: |
+            set -x
+            #Authenticate with the Salesforce Source And Target Orgs using JWT with corrected flags
+            sf org login jwt --username "$(sourceOrgUserName)" --client-id "$(sourceOrgClientId)" --jwt-key-file "$(sourceServerKey.secureFilePath)" --instance-url "$(sourceOrgInstanceURL)"
+            sf org login jwt --username "$(targetOrgUserName)" --client-id "$(targetOrgClientId)" --jwt-key-file "$(targetServerKey.secureFilePath)" --instance-url "$(targetOrgInstanceURL)"
+            
+              # Proceed with vlocity build
+              echo "Starting Vlocity Build"
+              if [  ${{ parameters.org2orgMigration }} == True  ] ; then
+                echo "Setting mode Org to Org Vlocity Migration"
+                is_empty_dir() { [[ "*..." = "$(printf %s * .*)" ]]; }
+                if [[ -d ./sfi ]]; then
+                  cd ./sfi
+                  if is_empty_dir ; then
+                    echo "Vlocity Build NOT executed"
+                  else
+                    if [ -f *.yaml ] ; then
+                      files=( *.yaml )
+                      if [ $? -eq 0 ]; then
+                        echo "Starting Vlocity Pack Export For Org to Org Migration"
+                        vlocity -sfdx.username  "$(sourceOrgUserName)" -job "${files[0]}" packExport
+                        if [ $? -eq 0 ]; then
+                          vlocity -sfdx.username  "$(targetOrgUserName)" -job "${files[0]}" cleanOrgData
+                          echo "Starting Vlocity Pack Deploy"
+                          vlocity -sfdx.username  "$(targetOrgUserName)" --gitCheck true -job "${files[0]}" packDeploy
+                          if [ $? -eq 0 ]; then
+                              echo "Vlocity Build Deployment Success"
+                          else
+                              echo "Vlocity Build Deployment Failed"
+                              exit 1
+                          fi  
+                        else
+                            echo "Vlocity Build Export Validation Failed"
+                            exit 1
+                        fi
+                      else
+                          echo "Vlocity Build Export Failed"
+                          exit 1    
+                      fi
+                    fi
+                  fi
+                fi
+              else
+                echo "Setting mode source control Vlocity migration"
+                cd $(Agent.BuildDirectory)/s/SF-Rosalind
+                git checkout $(targetBranch)
+                git checkout $(sourceBranch)
+                cd $(Agent.BuildDirectory)/s/SF-Rosalind/$(sourceBranch)
+                git diff --name-only $(targetBranch)...$(sourceBranch) > changes.txt
+                cat changes.txt
+                node $(Pipeline.Workspace)/tools/generate-delta-vlocity-job.js
+                if [ $? -eq 0 ]; then
+                  cat delta-deploy-job.yaml 
+                  if grep -q 'DataRaptor/' delta-deploy-job.yaml || grep -q 'IntegrationProcedure/' delta-deploy-job.yaml || grep -q 'FlexCard/' delta-deploy-job.yaml || grep -q 'OmniScript/' delta-deploy-job.yaml ; then
+                    vlocity -sfdx.username  "$(targetOrgUserName)" -job delta-deploy-job.yaml --gitCheck true packDeploy ; 
+                    if [ $? -eq 0 ]; then
+                      echo "Vlocity Build Deployment Success"
+                    else
+                      echo "Vlocity Build Deployment Failed"
+                      exit 1
+                    fi 
+                  fi
+                else
+                echo "Error parsing job manifest for Vlocity" 
+                exit 1 
+                fi
+              fi
+    - job: Salesforce_Core_Validation
+      displayName : Salesforce Core Build Validation
+      dependsOn: Vlocity_Build
+      timeoutInMinutes: 200
+      steps:
+        - checkout: code-repo
+          persistCredentials: true
+          fetchDepth: 0
+        - template: /templates/sf-init.yml
+        - task: DownloadSecureFile@1
+          name: sourceServerKey
+          displayName: 'Downloading source server certificate'
+          inputs:
+            secureFile: $(sourceServerKeyFile)
+        - task: DownloadSecureFile@1
+          name: targetServerKey
+          displayName: 'Download target server certificate'
+          inputs:
+            secureFile: $(targetServerKeyFile)
+        - bash: |
+            set -x
+            #Authenticate with the Salesforce Source And Target Orgs using JWT with corrected flags
+            sf org login jwt --username "$(sourceOrgUserName)" --client-id "$(sourceOrgClientId)" --jwt-key-file "$(sourceServerKey.secureFilePath)" --instance-url "$(sourceOrgInstanceURL)"
+            sf org login jwt --username "$(targetOrgUserName)" --client-id "$(targetOrgClientId)" --jwt-key-file "$(targetServerKey.secureFilePath)" --instance-url "$(targetOrgInstanceURL)"
+                      
+            validationResult=""
+            preDestructiveChanges=""
+            postDestructiveChanges=""
+            if [[ -f $(System.DefaultWorkingDirectory)/manifest/destructiveChangesPre.xml ]] ; then
+                preDestructiveChanges=" --pre-destructive-changes $(System.DefaultWorkingDirectory)/manifest/destructiveChangesPre.xml"
+            fi
+            if [[ -f $(System.DefaultWorkingDirectory)/manifest/destructiveChangesPost.xml ]] ; then
+                postDestructiveChanges=" --post-destructive-changes $(System.DefaultWorkingDirectory)/manifest/destructiveChangesPost.xml"
+            fi
+            
+            if [ "${{parameters.testLevel}}" == "RunSpecifiedTests" ]; then
+              IFS=\, read -ra fields <<<${{ parameters.testsToRun }}
+              set | grep ^fields=\\\|^"${{ parameters.testsToRun }}"=
+              function join {
+                  local __sep=${2-} __temp
+                  printf -v __temp "${__sep//%/%%}%s" "${@:3}"
+                  printf -v "$1" %s "${__temp:${#__sep}}"
+              }
+              join result ' --tests ' "${fields[@]}"
+              result=" --tests ${result}"
+              
+              if [[ ! -e $(System.DefaultWorkingDirectory)/artifacts/code ]]; then
+                mkdir -p $(System.DefaultWorkingDirectory)/artifacts/code
+              fi
+              retrieveSource=""
+              if [[ -z "$preDestructiveChanges" && -z "$postDestructiveChanges" ]]; then
+              	retrieveSource=" --source-dir $(System.DefaultWorkingDirectory)/force-app"
+              else
+              	retrieveSource=" --manifest $(System.DefaultWorkingDirectory)/manifest/package.xml $preDestructiveChanges $postDestructiveChanges"	
+              fi
+              echo Starting Salesforce project validation
+              if [ "${{parameters.testLevel}}" != "NoTestRun" ]; then
+                validationResult=$(sf project deploy start --api-version ${{ parameters.apiVersion }} --dry-run $retrieveSource --target-org "$(targetOrgUserName)" $result --test-level "${{parameters.testLevel}}" --coverage-formatters cobertura --coverage-formatters html --coverage-formatters json --results-dir "$(System.DefaultWorkingDirectory)/artifacts/code" --json --junit) 
+              else
+                validationResult=$(sf project deploy start --api-version ${{ parameters.apiVersion }} --dry-run $retrieveSource --target-org "$(targetOrgUserName)" $result --test-level "${{parameters.testLevel}}" --coverage-formatters cobertura --coverage-formatters html --coverage-formatters json --results-dir "$(System.DefaultWorkingDirectory)/artifacts/code" --json) 
+              fi    
+            else  
+              echo "Starting Salesforce project validation"
+              retrieveSource=""
+              if [[ -z "$preDestructiveChanges" && -z "$postDestructiveChanges" ]]; then
+              	retrieveSource=" --source-dir $(System.DefaultWorkingDirectory)/force-app"
+              else
+              	retrieveSource=" --manifest $(System.DefaultWorkingDirectory)/manifest/package.xml $preDestructiveChanges $postDestructiveChanges"	
+              fi
+              if [ "${{parameters.testLevel}}" != "NoTestRun" ]; then
+                validationResult=$(sf project deploy start --api-version ${{ parameters.apiVersion }} --dry-run $retrieveSource --target-org "$(targetOrgUserName)" $result --test-level "${{parameters.testLevel}}" --coverage-formatters cobertura --coverage-formatters html --coverage-formatters json --results-dir "$(System.DefaultWorkingDirectory)/artifacts/code" --json --junit)  
+              else
+                validationResult=$(sf project deploy start --api-version ${{ parameters.apiVersion }} --dry-run $retrieveSource --target-org "$(targetOrgUserName)" $result --test-level "${{parameters.testLevel}}" --json) 
+              fi
+            fi
+            jobId=$(echo $validationResult | /usr/bin/jq -r ".result.id")
+            # If jobId is null or empty, print raw output for debugging
+            if [ -z "$jobId" ]; then
+              echo "Unexpected result from validation initiation."
+              exit 1
+            fi
+            # Check the validation status every 10 seconds
+            isComplete="false"
+            while [ "$isComplete" == "false" ]; do
+              sleep 10
+              statusResult=$(sf project deploy report --job-id $jobId --target-org "$(targetOrgUserName)" --json)
+              isComplete=$(echo $statusResult | /usr/bin/jq -r ".result.done")
+              status=$(echo $statusResult | /usr/bin/jq -r ".result.status")
+              componentfailures=$(echo "$statusResult" | /usr/bin/jq -r ".result.details.componentFailures" | jq -R) 
+              runTestResult=$(echo "$statusResult" | /usr/bin/jq -r ".result.details.runTestResult.codeCoverageWarnings" | jq -R)
+              echo "##vso[task.setvariable variable=ValidationStatus]$status"
+              echo "##vso[task.setvariable variable=ValidationJobId]$jobId"
+              echo "$componentfailures"
+              echo "$runTestResult"
+            done
+
+            # Perform code scanning
+            sf plugins install @salesforce/sfdx-scanner@latest
+            if [[ ! -e $(System.DefaultWorkingDirectory)/artifacts/scannerResults.html ]]; then
+                mkdir -p $(System.DefaultWorkingDirectory)/artifacts/scan/
+                touch $(System.DefaultWorkingDirectory)/artifacts/scan/scannerResults.html
+            fi
+            sf scanner run --target "$(System.DefaultWorkingDirectory)/force-app" --outfile "$(System.DefaultWorkingDirectory)/artifacts/scan/scannerResults.html" --format html
+        - task: PublishCodeCoverageResults@2
+          inputs:
+            summaryFileLocation: '$(System.DefaultWorkingDirectory)/artifacts/code/coverage/cobertura.xml'
+            failIfCoverageEmpty: false
+        - task: PublishTestResults@2
+          inputs:
+            testResultsFormat: 'JUnit' # 'JUnit' | 'NUnit' | 'VSTest' | 'XUnit' | 'CTest'. Alias: testRunner. Required. Test result format. Default: JUnit.
+            testResultsFiles: '$(System.DefaultWorkingDirectory)/artifacts/code/junit/junit.xml'
+            failTaskOnFailedTests: false 
+            failTaskOnFailureToPublishResults: false 
+            failTaskOnMissingResultsFile : false
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: '$(System.DefaultWorkingDirectory)/artifacts/'
+            ArtifactName: 'drop'
+            publishLocation: 'Container'
+        - bash: |
+            # Check the final validation status and handle any errors
+            if [ "$(ValidationStatus)" != "Succeeded" ]; then
+              echo "Build failed With Errors" 
+              # Logout of orgs
+              sf org logout --all --no-prompt
+              exit 1
+            fi
+            echo "##vso[task.setvariable variable=DeploymentId;isOutput=true]$(ValidationJobId)"
+          name: PostValidationBuildFinalization 
+- stage: 'deploy_to_${{ parameters.targetOrg }}'
+  jobs:
+  - deployment: 'Deployment_to_${{ upper(parameters.targetOrg) }}'
+    displayName : 'Deployment To ${{ upper(parameters.targetOrg) }}'
+    environment:  
+      name: 'salesforce-${{parameters.targetOrg}}'
+    variables:
+      deploymentId: $[ stageDependencies.salesforce_build_validate.Salesforce_Core_Validation.outputs['PostValidationBuildFinalization.DeploymentId'] ]
+    strategy:
+        runOnce:
+          deploy:
+            steps:
+            - checkout: code-repo
+            - template: /templates/sf-init.yml
+            - task: DownloadSecureFile@1
+              name: sourceServerKey
+              displayName: 'Downloading source server certificate'
+              inputs:
+                secureFile: $(sourceServerKeyFile)
+            - task: DownloadSecureFile@1
+              name: targetServerKey
+              displayName: 'Download target server certificate'
+              inputs:
+                secureFile: $(targetServerKeyFile)
+            - bash: |
+                set -x 
+                #Authenticate with the Salesforce Target Org using JWT with corrected flags
+                sf org login jwt --username "$(targetOrgUserName)" --client-id "$(targetOrgClientId)" --jwt-key-file "$(targetServerKey.secureFilePath)" --instance-url "$(targetOrgInstanceURL)"
+
+                echo "Deploying Salesforce project"
+                deployResult=$(sf project deploy quick --api-version ${{ parameters.apiVersion }} --job-id $(deploymentId) --target-org "$(targetOrgUserName)" --json) 
+
+                jobId=$(echo $deployResult | /usr/bin/jq -r ".result.id")
+                # If jobId is null or empty, print raw output for debugging
+                if [ -z "$jobId" ]; then
+                  echo "Unexpected result from deployment initiation."
+                  exit 1
+                fi
+                # Check the deploy status every 10 seconds
+                isComplete="false"
+                status=""
+                while [ "$isComplete" == "false" ]; do
+                  sleep 10
+                  statusResult=$(sf project deploy report --job-id $jobId --target-org "$(targetOrgUserName)" --json)
+                  isComplete=$(echo $statusResult | /usr/bin/jq -r ".result.done")
+                  status=$(echo $statusResult | /usr/bin/jq -r ".result.status")
+                  componentfailures=$(echo "$statusResult" | /usr/bin/jq -r ".result.details.componentFailures" | jq -R) 
+                  runTestResult=$(echo "$statusResult" | /usr/bin/jq -r ".result.details.runTestResult.codeCoverageWarnings" | jq -R)
+                  echo "##vso[task.setvariable variable=BuildStatus]$status"
+                  echo "$componentfailures"
+                  echo "$runTestResult"
+                done
+                echo Deployment complete
+                # Check the final build status and handle any errors
+                echo "Build Status : $status"
+                if [ "$status" != "Succeeded" ]; then
+                  echo "Build failed With Errors" 
+                  # Logout of orgs
+                  sf org logout --all --no-prompt
+                  exit 1
+                fi
+- stage: generate_data_dictionary
+  dependsOn: deploy_to_${{ parameters.targetOrg }}
+  condition: succeeded('deploy_to_${{ parameters.targetOrg }}')
+  jobs:
+    - job: Generate_Data_Dictionary
+      displayName : Generate Data Dictionary
+      timeoutInMinutes: 200
+      steps:
+        - checkout: code-repo
+        - task: DownloadSecureFile@1
+          name: targetServerKey
+          displayName: 'Download target server certificate'
+          inputs:
+            secureFile: $(targetServerKeyFile)   
+        - bash: |
+            set -x
+            if [ -f ./datadictionary.manifest ]; then
+              npm install -g sfdc-generate-data-dictionary
+              objectlist=`cat ./datadictionary.manifest`
+              mkdir -p $(System.DefaultWorkingDirectory)/artifacts/datadictionary
+              touch $(System.DefaultWorkingDirectory)/artifacts/datadictionary/lucidchart.txt
+              sgd -u "$(targetOrgUserName)" -p "$(targetOrgUserPassword)" -l "$(targetOrgInstanceURL)" --sobjects "$objectlist" -lc -o "$(System.DefaultWorkingDirectory)/artifacts/datadictionary/" false
+            fi
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: '$(System.DefaultWorkingDirectory)/artifacts/'
+            ArtifactName: 'drop'
+            publishLocation: 'Container'
